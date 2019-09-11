@@ -1,28 +1,20 @@
 ---
 title: 'Investigating large datasets in R'
-author: "Data Carpentry Contributors"
-teaching: 
-exercises: 
-questions:
-objectives: 
 source: Rmd
 ---
-```{r setup, message = FALSE, warning = FALSE, echo = FALSE}
-
-source("../bin/chunk-options.R")
-knitr::opts_chunk$set(message = FALSE, warning = FALSE)
-knitr_fig_path("05-")
-
-
-```
 
 ### How to Work with Complex Models: IT Model Averaging
 
 ```{r global-model}
 # Global model
 library(arm)
-phys_data<-read.csv("data/Physiology_Environmental_Data.csv")
-fit_all <- lm(Trmmol_night ~ (VPD_N + TAIR_N + Soil_moisture + Fgroup)^2, data=phys_data)
+phys_data<-data.frame(
+	Year=c(2014,2014),
+	Trmmol_night=c(0.605764342,0.374118061),
+	VPD_N = c(0.907746724,0.907746724)
+	)
+
+fit_all <- lm(Trmmol_night ~ VPD_N, data=phys_data)
 str(phys_data)
 str(fit_all)
 stdz.model<-arm::standardize(fit_all)
