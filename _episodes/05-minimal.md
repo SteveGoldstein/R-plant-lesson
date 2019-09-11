@@ -7,26 +7,8 @@ teaching:
 exercises: 
 questions:
 objectives: 
-- Explore a large dataset graphically
-- Develop simple models with `lm()`
-- Choose new packages and interpret package descriptions
-- Analyze complex models using Information Theoretic (IT) Model Averaging (`arm` and `MuMIn` packages)
-keypoints: 
-- 
 source: Rmd
 ---
-
-### Setup
-Let's begin by loading the data and packages necessary to start this lesson.
-
-~~~
-# Load packages
-library(ggplot2)
-
-# Load data
-phys_data<-read.csv("data/Physiology_Environmental_Data.csv")
-~~~
-{: .language-r}
 
 
 ### How to Work with Complex Models: IT Model Averaging
@@ -34,26 +16,120 @@ phys_data<-read.csv("data/Physiology_Environmental_Data.csv")
 
 ~~~
 # Global model
-fit_all <- lm(Trmmol_night ~ (VPD_N + TAIR_N + Soil_moisture + Fgroup)^2, data=phys_data)
-~~~
-{: .language-r}
-
-
-
-~~~
-# Load packages
 library(arm)
-library(MuMIn)
+phys_data<-read.csv("data/Physiology_Environmental_Data.csv")
+fit_all <- lm(Trmmol_night ~ (VPD_N + TAIR_N + Soil_moisture + Fgroup)^2, data=phys_data)
+str(phys_data)
 ~~~
 {: .language-r}
 
-First, let's standardize our input variables with the `standardize()` function in the `arm` package. `standardize()` rescales numeric variables that take on more than two values to have a mean of 0 and a standard deviation of 0.5. To do this, we just need to specify the object to standardize (our global model, `fit_all`):
+
 
 ~~~
-#{r standardize-global-model, eval = FALSE}
-# Standardize the global model
+'data.frame':	285 obs. of  18 variables:
+ $ Year          : int  2014 2014 2014 2014 2014 2014 2014 2014 2014 2014 ...
+ $ DOY           : int  169 169 169 169 169 169 169 169 169 169 ...
+ $ Species       : Factor w/ 8 levels "AC","AG","CD",..: 2 2 2 3 3 3 6 6 6 8 ...
+ $ Fgroup        : Factor w/ 3 levels "forb","grass",..: 2 2 2 3 3 3 1 1 1 1 ...
+ $ Cond_night    : num  0.0273 0.0168 0.0655 0.0593 0.0594 ...
+ $ Trmmol_night  : num  0.606 0.374 1.414 1.265 1.241 ...
+ $ Photo         : num  25 20.5 22.5 16.4 17 ...
+ $ Cond_day      : num  0.186 0.162 0.169 0.398 0.313 ...
+ $ Trmmol_day    : num  5.55 5.2 6.84 9.21 9.55 ...
+ $ Percent_cond  : num  14.7 10.4 38.9 14.9 17.5 ...
+ $ Percent_trmmol: num  10.9 7.2 20.7 13.7 11.7 ...
+ $ PD            : num  -0.2 -0.4 -0.35 -0.15 -0.3 -0.45 -0.35 -0.3 -0.2 -0.3 ...
+ $ MD            : num  -0.95 -0.9 -0.95 -1.4 -1.45 -1.15 -1.4 -1 -1.45 -0.8 ...
+ $ Soil_moisture : num  0.213 0.213 0.213 0.213 0.213 0.213 0.213 0.213 0.213 0.213 ...
+ $ TAIR_N        : num  26.6 26.6 26.6 26.6 26.6 ...
+ $ VPD_N         : num  0.908 0.908 0.908 0.908 0.908 ...
+ $ TAIR_D        : num  27.6 27.6 27.6 27.6 27.6 ...
+ $ VPD_D         : num  1.26 1.26 1.26 1.26 1.26 ...
+~~~
+{: .output}
 
-stdz.model<-standardize(fit_all)
+
+
+~~~
+str(fit_all)
+~~~
+{: .language-r}
+
+
+
+~~~
+List of 13
+ $ coefficients : Named num [1:15] -0.748 -0.756 0.106 4.845 0.25 ...
+  ..- attr(*, "names")= chr [1:15] "(Intercept)" "VPD_N" "TAIR_N" "Soil_moisture" ...
+ $ residuals    : Named num [1:285] -0.0667 -0.2983 0.7417 0.7553 0.7309 ...
+  ..- attr(*, "names")= chr [1:285] "1" "2" "3" "4" ...
+ $ effects      : Named num [1:285] -8.09 1.658 -0.423 -0.95 0.787 ...
+  ..- attr(*, "names")= chr [1:285] "(Intercept)" "VPD_N" "TAIR_N" "Soil_moisture" ...
+ $ rank         : int 15
+ $ fitted.values: Named num [1:285] 0.672 0.672 0.672 0.51 0.51 ...
+  ..- attr(*, "names")= chr [1:285] "1" "2" "3" "4" ...
+ $ assign       : int [1:15] 0 1 2 3 4 4 5 6 7 7 ...
+ $ qr           :List of 5
+  ..$ qr   : num [1:285, 1:15] -16.8819 0.0592 0.0592 0.0592 0.0592 ...
+  .. ..- attr(*, "dimnames")=List of 2
+  .. .. ..$ : chr [1:285] "1" "2" "3" "4" ...
+  .. .. ..$ : chr [1:15] "(Intercept)" "VPD_N" "TAIR_N" "Soil_moisture" ...
+  .. ..- attr(*, "assign")= int [1:15] 0 1 2 3 4 4 5 6 7 7 ...
+  .. ..- attr(*, "contrasts")=List of 1
+  .. .. ..$ Fgroup: chr "contr.treatment"
+  ..$ qraux: num [1:15] 1.06 1.01 1.08 1.08 1.05 ...
+  ..$ pivot: int [1:15] 1 2 3 4 5 6 7 8 9 10 ...
+  ..$ tol  : num 1e-07
+  ..$ rank : int 15
+  ..- attr(*, "class")= chr "qr"
+ $ df.residual  : int 270
+ $ contrasts    :List of 1
+  ..$ Fgroup: chr "contr.treatment"
+ $ xlevels      :List of 1
+  ..$ Fgroup: chr [1:3] "forb" "grass" "woody"
+ $ call         : language lm(formula = Trmmol_night ~ (VPD_N + TAIR_N + Soil_moisture + Fgroup)^2,      data = phys_data)
+ $ terms        :Classes 'terms', 'formula'  language Trmmol_night ~ (VPD_N + TAIR_N + Soil_moisture + Fgroup)^2
+  .. ..- attr(*, "variables")= language list(Trmmol_night, VPD_N, TAIR_N, Soil_moisture, Fgroup)
+  .. ..- attr(*, "factors")= int [1:5, 1:10] 0 1 0 0 0 0 0 1 0 0 ...
+  .. .. ..- attr(*, "dimnames")=List of 2
+  .. .. .. ..$ : chr [1:5] "Trmmol_night" "VPD_N" "TAIR_N" "Soil_moisture" ...
+  .. .. .. ..$ : chr [1:10] "VPD_N" "TAIR_N" "Soil_moisture" "Fgroup" ...
+  .. ..- attr(*, "term.labels")= chr [1:10] "VPD_N" "TAIR_N" "Soil_moisture" "Fgroup" ...
+  .. ..- attr(*, "order")= int [1:10] 1 1 1 1 2 2 2 2 2 2
+  .. ..- attr(*, "intercept")= int 1
+  .. ..- attr(*, "response")= int 1
+  .. ..- attr(*, ".Environment")=<environment: 0x7fa5b99cd878> 
+  .. ..- attr(*, "predvars")= language list(Trmmol_night, VPD_N, TAIR_N, Soil_moisture, Fgroup)
+  .. ..- attr(*, "dataClasses")= Named chr [1:5] "numeric" "numeric" "numeric" "numeric" ...
+  .. .. ..- attr(*, "names")= chr [1:5] "Trmmol_night" "VPD_N" "TAIR_N" "Soil_moisture" ...
+ $ model        :'data.frame':	285 obs. of  5 variables:
+  ..$ Trmmol_night : num [1:285] 0.606 0.374 1.414 1.265 1.241 ...
+  ..$ VPD_N        : num [1:285] 0.908 0.908 0.908 0.908 0.908 ...
+  ..$ TAIR_N       : num [1:285] 26.6 26.6 26.6 26.6 26.6 ...
+  ..$ Soil_moisture: num [1:285] 0.213 0.213 0.213 0.213 0.213 0.213 0.213 0.213 0.213 0.213 ...
+  ..$ Fgroup       : Factor w/ 3 levels "forb","grass",..: 2 2 2 3 3 3 1 1 1 1 ...
+  ..- attr(*, "terms")=Classes 'terms', 'formula'  language Trmmol_night ~ (VPD_N + TAIR_N + Soil_moisture + Fgroup)^2
+  .. .. ..- attr(*, "variables")= language list(Trmmol_night, VPD_N, TAIR_N, Soil_moisture, Fgroup)
+  .. .. ..- attr(*, "factors")= int [1:5, 1:10] 0 1 0 0 0 0 0 1 0 0 ...
+  .. .. .. ..- attr(*, "dimnames")=List of 2
+  .. .. .. .. ..$ : chr [1:5] "Trmmol_night" "VPD_N" "TAIR_N" "Soil_moisture" ...
+  .. .. .. .. ..$ : chr [1:10] "VPD_N" "TAIR_N" "Soil_moisture" "Fgroup" ...
+  .. .. ..- attr(*, "term.labels")= chr [1:10] "VPD_N" "TAIR_N" "Soil_moisture" "Fgroup" ...
+  .. .. ..- attr(*, "order")= int [1:10] 1 1 1 1 2 2 2 2 2 2
+  .. .. ..- attr(*, "intercept")= int 1
+  .. .. ..- attr(*, "response")= int 1
+  .. .. ..- attr(*, ".Environment")=<environment: 0x7fa5b99cd878> 
+  .. .. ..- attr(*, "predvars")= language list(Trmmol_night, VPD_N, TAIR_N, Soil_moisture, Fgroup)
+  .. .. ..- attr(*, "dataClasses")= Named chr [1:5] "numeric" "numeric" "numeric" "numeric" ...
+  .. .. .. ..- attr(*, "names")= chr [1:5] "Trmmol_night" "VPD_N" "TAIR_N" "Soil_moisture" ...
+ - attr(*, "class")= chr "lm"
+~~~
+{: .output}
+
+
+
+~~~
+stdz.model<-arm::standardize(fit_all)
 ~~~
 {: .language-r}
 
@@ -63,76 +139,3 @@ stdz.model<-standardize(fit_all)
 Error in get(as.character(call$data)): object 'phys_data' not found
 ~~~
 {: .error}
-
-
-
-~~~
-summary(stdz.model)
-~~~
-{: .language-r}
-
-
-
-~~~
-Error in summary(stdz.model): object 'stdz.model' not found
-~~~
-{: .error}
-
-Next, we create the full submodel set with the `dredge()` function in the `MuMIn` package by specifying the object that `dredge()` will evaluate (our standardized model, `stdz.model`). We also need to change the default "na.omit" to prevent models from being fitted to different datasets in case of missing values using `options(na.action=na.fail) `:
-
-~~~
-#{r options-model-set, eval = FALSE}
-options(na.action=na.fail) 
-model.set<-dredge(stdz.model)
-~~~
-{: .language-r}
-
-
-
-~~~
-Error in nobs(global.model): object 'stdz.model' not found
-~~~
-{: .error}
-
-The `get.models()` function will then create a top model set. First, we need to specify the object that `get.models` will evaluate (our model set, `model.set`), and then we need to specify the subset of models to include all models within 4AICcs with `subset=delta<4`:
-
-~~~
-top.models<-get.models(model.set, subset=delta<4)
-top.models
-~~~
-{: .language-r}
-
-Finally, we'll use the `model.avg()` function to create our average model and calculates relative importance. We need to specify the object that `model.avg()` will evaluate (in this case our top model set, `top.models`):
-
-~~~
-average_model<-model.avg(top.models)
-~~~
-{: .language-r}
-
-To check out our final average model, use the `summary()` function:
-
-~~~
-summary(average_model)
-~~~
-{: .language-r}
-
-This is a lot of information! We can see which component models were chosen as the top model set and then averaged, as well as their associated ranking information. We can also see the model-averaged coefficients for both the full average model and conditional average model.
-
-The *conditional average* only averages over the models where the parameter appears. Conversely, the *full average* assumes that a variable is included in every model, but in some models the corresponding coefficient (and its respective variance) is set to zero. Unlike the *conditional average*, the *full average* does not bias the value away from zero.
-
-We can also check out the relative importance of each factor within the model with the `importance()` function. Relative importance is a unitless metric ranging from 0 (doesn't contribute to the model at all) to 1 (contributes heavily to the model). This function will also give use the number of models within the top model set that contain each factor.
-
-~~~
-importance(average_model)
-~~~
-{: .language-r}
-
-
-> ## Challenge 4
-> Using IT Model Averaging, create a model that tests for the effects of four factors on either transpiration or stomatal conductance. Then, create a plot that best illustrates the main finding of your top model. Ultimately, your results should be able to address one of these questions:
->
-> - What environmental variables drive nocturnal transpiration / stomatal conductance, and do these differ from the drivers of daytime transpiration / stomatal conductance?
-> - Are nocturnal transpiration and stomatal conductance associated with daytime physiological processes?
-{: .challenge}
-
-
