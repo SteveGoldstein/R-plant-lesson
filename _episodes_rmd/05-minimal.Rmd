@@ -5,17 +5,30 @@ source: Rmd
 
 ### How to Work with Complex Models: IT Model Averaging
 
-```{r global-model}
+```{r standardize-model}
 # Global model
 library(arm)
-phys_data<-data.frame(
-	Year=c(2014,2014),
-	Trmmol_night=c(0.605764342,0.374118061),
-	VPD_N = c(0.907746724,0.907746724)
-	)
 
-fit_all <- lm(Trmmol_night ~ VPD_N, data=phys_data)
-str(phys_data)
-str(fit_all)
-stdz.model<-arm::standardize(fit_all)
+
+a <- c(0.91,0.52)
+b <- c(0.61,1.90)
+
+c <- data.frame(a,b)
+fit1 <- lm(b ~ a, data=c)
+
+a <- c(0.91,0.52)
+bb <- c(0.61,1.90)
+
+d <- data.frame(a,bb)
+fit2 <- lm(bb ~ a, data=d)
+
+stdz.model<-arm::standardize(fit1)
+stdz.model<-arm::standardize(fit2)
+
+
+str(c)
+str(d)
+str(fit1)
+str(fit2)
+
 ```

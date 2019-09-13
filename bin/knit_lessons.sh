@@ -4,5 +4,6 @@
 # The Makefile passes in the names of files.
 
 if [ $# -eq 2 ] ; then
+    #Rscript --vanilla bin/generate_md_episodes.R "$@"
     Rscript -e "source('bin/generate_md_episodes.R')" "$@"
 fi
