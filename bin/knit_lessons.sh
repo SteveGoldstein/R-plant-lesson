@@ -5,5 +5,5 @@
 
 if [ $# -eq 2 ] ; then
     #Rscript --vanilla bin/generate_md_episodes.R "$@"
-    Rscript -e "source('bin/generate_md_episodes.R')" "$@"
+    Rscript -e "source('bin/generate_md_episodes_minimal.R')" "$@"
 fi
